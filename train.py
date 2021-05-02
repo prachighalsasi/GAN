@@ -123,7 +123,7 @@ def train(path, batch_size, EPOCHS):
             if g_loss < d_loss and abs(d_loss - g_loss) > inter_model_margin:
                 #for j in range(handicap):
                 while abs(d_loss - g_loss) > inter_model_margin:
-                    print "Updating discriminator.."
+                    print ("Updating discriminator..")
                     #g_loss = discriminator_on_generator.train_on_batch(Xg, yg)
                     d_loss = discriminator.train_on_batch(Xd, yd)
                     print ("Generator loss", g_loss, "Discriminator loss", d_loss)
