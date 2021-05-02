@@ -44,9 +44,9 @@ def train(path, batch_size, EPOCHS):
     fig = plt.figure()
 
     # Get image paths
-    print "Loading paths.."
+    print ("Loading paths..")
     paths = glob.glob(os.path.join(path, "*.jpg"))
-    print "Got paths.."
+    print ("Got paths..")
 
     # Load images
     IMAGES = np.array( [ load_image(p) for p in paths ] )
@@ -71,30 +71,30 @@ def train(path, batch_size, EPOCHS):
     discriminator.trainable = True
     discriminator.compile(loss='binary_crossentropy', optimizer=adam_dis)
 
-    print "Number of batches", len(BATCHES)
-    print "Batch size is", batch_size
+    print ("Number of batches", len(BATCHES))
+    print ("Batch size is", batch_size)
 
     #margin = 0.25
     #equilibrium = 0.6931
     inter_model_margin = 0.10
 
     for epoch in range(EPOCHS):
-        print
-        print "Epoch", epoch
-        print
+        print ()
+        print ("Epoch", epoch)
+        print ()
 
         # load weights on first try (i.e. if process failed previously and we are attempting to recapture lost data)
         if epoch == 0:
             if os.path.exists('generator_weights') and os.path.exists('discriminator_weights'):
-                print "Loading saves weights.."
+                print ("Loading saves weights..")
                 generator.load_weights('generator_weights')
                 discriminator.load_weights('discriminator_weights')
-                print "Finished loading"
+                print ("Finished loading")
             else:
                 pass
 
         for index, image_batch in enumerate(BATCHES):
-            print "Epoch", epoch, "Batch", index
+            print ("Epoch", epoch, "Batch", index)
 
             Noise_batch = np.array( [ noise_image() for n in range(len(image_batch)) ] )
             generated_images = generator.predict(Noise_batch)
@@ -107,16 +107,16 @@ def train(path, batch_size, EPOCHS):
             Xd = np.concatenate((image_batch, generated_images))
             yd = [1] * len(image_batch) + [0] * len(image_batch) # labels
 
-            print "Training first discriminator.."
+            print ("Training first discriminator..")
             d_loss = discriminator.train_on_batch(Xd, yd)
 
             Xg = Noise_batch
             yg = [1] * len(image_batch)
 
-            print "Training first generator.."
+            print ("Training first generator..")
             g_loss = discriminator_on_generator.train_on_batch(Xg, yg)
 
-            print "Initial batch losses : ", "Generator loss", g_loss, "Discriminator loss", d_loss, "Total:", g_loss + d_loss
+            print ("Initial batch losses : ", "Generator loss", g_loss, "Discriminator loss", d_loss, "Total:", g_loss + d_loss)
 
             #print "equilibrium - margin", equilibrium - margin
 
@@ -126,26 +126,26 @@ def train(path, batch_size, EPOCHS):
                     print "Updating discriminator.."
                     #g_loss = discriminator_on_generator.train_on_batch(Xg, yg)
                     d_loss = discriminator.train_on_batch(Xd, yd)
-                    print "Generator loss", g_loss, "Discriminator loss", d_loss
+                    print ("Generator loss", g_loss, "Discriminator loss", d_loss)
                     if d_loss < g_loss:
                         break
             elif d_loss < g_loss and abs(d_loss - g_loss) > inter_model_margin:
                 #for j in range(handicap):
                 while abs(d_loss - g_loss) > inter_model_margin:
-                    print "Updating generator.."
+                    print ("Updating generator..")
                     #d_loss = discriminator.train_on_batch(Xd, yd)
                     g_loss = discriminator_on_generator.train_on_batch(Xg, yg)
-                    print "Generator loss", g_loss, "Discriminator loss", d_loss
+                    print ("Generator loss", g_loss, "Discriminator loss", d_loss)
                     if g_loss < d_loss:
                         break
             else:
                 pass
 
-            print "Final batch losses (after updates) : ", "Generator loss", g_loss, "Discriminator loss", d_loss, "Total:", g_loss + d_loss
-            print
+            print ("Final batch losses (after updates) : ", "Generator loss", g_loss, "Discriminator loss", d_loss, "Total:", g_loss + d_loss)
+            print ()
 
             if index % 20 == 0:
-                print 'Saving weights..'
+                print ('Saving weights..')
                 generator.save_weights('generator_weights', True)
                 discriminator.save_weights('discriminator_weights', True)
 
@@ -171,7 +171,7 @@ def generate(img_num):
 
     noise = np.array( [ noise_image() for n in range(img_num) ] )
 
-    print 'Generating images..'
+    print ('Generating images..')
     generated_images = [np.rollaxis(img, 0, 3) for img in generator.predict(noise)]
     for index, img in enumerate(generated_images):
         cv2.imwrite("{}.jpg".format(index), np.uint8(255 * 0.5 * (img + 1.0)))
